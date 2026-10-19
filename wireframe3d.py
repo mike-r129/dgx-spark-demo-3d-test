@@ -356,6 +356,7 @@ HELP_TEXT = ("← / →   switch shape\n"
              "1-5 / M   shader style\n"
              "space     pause\n"
              "A         auto-cycle shapes\n"
+             "B         starfield on/off\n"
              "+ / −     spin speed\n"
              "wheel     zoom\n"
              "drag      rotate (with inertia)\n"
@@ -370,9 +371,9 @@ class App(tk.Tk):
         super().__init__()
         self.title("3D Shader Styles - Tkinter")
         self.geometry("960x640")
-        self.configure(bg="#05050c")
+        self.configure(bg="#000000")
         self.fs = False
-        self.canvas = tk.Canvas(self, bg="#05050c", bd=0, highlightthickness=0)
+        self.canvas = tk.Canvas(self, bg="#000000", bd=0, highlightthickness=0)
         self.canvas.pack(fill="both", expand=True)
         bar = tk.Frame(self, bg="#10101a")
         bar.pack(fill="x")
@@ -396,6 +397,7 @@ class App(tk.Tk):
         self.pause_btn = btn("Pause", self.toggle_pause)
         self.mode_btn = btn("Style: Solid", self.cycle_mode)
         self.auto_btn = btn("Auto: Off", self.toggle_auto)
+        self.bg_btn = btn("BG: Black", self.toggle_bg)
         btn("Reset", self.reset_view)
         btn("Speed -", lambda: self.change_speed(1 / 1.3))
         btn("Speed +", lambda: self.change_speed(1.3))
@@ -425,6 +427,7 @@ class App(tk.Tk):
         self.fps = 60.0
         self.last_frame = time.perf_counter()
         self.bake_job = None
+        self.bg_on = False
         self.show_help = False
 
         self.bind("<Left>", lambda e: self.switch(-1))
@@ -432,6 +435,7 @@ class App(tk.Tk):
         self.bind("<space>", lambda e: self.toggle_pause())
         self.bind("<m>", lambda e: self.cycle_mode())
         self.bind("<a>", lambda e: self.toggle_auto())
+        self.bind("<b>", lambda e: self.toggle_bg())
         self.bind("<r>", lambda e: self.reset_view())
         self.bind("<f>", lambda e: self.toggle_fullscreen())
         self.bind("<h>", lambda e: self.toggle_help())
@@ -456,6 +460,8 @@ class App(tk.Tk):
         if w < 40 or h < 40:
             return
         c.delete("bg")
+        if not self.bg_on:
+            return
         bands = 44
         top = (21, 22, 44)
         bot = (6, 6, 14)
@@ -488,9 +494,10 @@ class App(tk.Tk):
             text=f"{s.name}  ·  {len(s.verts)} verts / {len(s.faces)} faces  ·  "
                  f"x{self.speed:.2f}  ·  {MODES[self.mode]}\n"
                  "←→ shape · 1-5/M style · space pause · A auto · R reset · "
-                 "F full · H help · wheel zoom · drag rotate")
+                 "F full · H help · B bg · wheel zoom · drag rotate")
         self.mode_btn.config(text=f"Style: {MODES[self.mode]}")
         self.auto_btn.config(text=f"Auto: {'On' if self.auto else 'Off'}")
+        self.bg_btn.config(text=f"BG: {'Stars' if self.bg_on else 'Black'}")
 
     def switch(self, d):
         self.idx = (self.idx + d) % len(self.shapes)
@@ -509,6 +516,17 @@ class App(tk.Tk):
     def toggle_auto(self):
         self.auto = not self.auto
         self.last_switch = time.perf_counter()
+        self.update_status()
+
+    def toggle_bg(self):
+        self.bg_on = not self.bg_on
+        if self.bake_job is not None:
+            self.after_cancel(self.bake_job)
+            self.bake_job = None
+        if self.win_w < 40:
+            self.bake_job = self.after(180, self.bake_bg)
+        else:
+            self.bake_bg()
         self.update_status()
 
     def reset_view(self):
