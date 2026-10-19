@@ -677,9 +677,15 @@ class App(tk.Tk):
                 if len(f) == 4:
                     depth = A[2] + B[2] + C[2] + pts3[f[3]][2]
                     coords = pts2[f[0]] + pts2[f[1]] + pts2[f[2]] + pts2[f[3]]
-                else:
+                elif len(f) == 3:
                     depth = A[2] + B[2] + C[2]
                     coords = pts2[f[0]] + pts2[f[1]] + pts2[f[2]]
+                else:
+                    depth = 0.0
+                    coords = ()
+                    for i in f:
+                        depth += pts3[i][2]
+                        coords = coords + pts2[i]
                 if mode == "Chrome":
                     tt = (n2 + 1.0) * 0.5
                     kk = 0.3 + 0.7 * d1
