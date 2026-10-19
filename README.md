@@ -1,5 +1,7 @@
 # 3D Shader Styles — Tkinter Wireframe Demo
 
+![Screenshot](screenshot.png)
+
 A dependency-free Python/Tkinter demo that renders ten procedurally generated
 3D meshes with five switchable render styles. Written as a first test demo on
 NVIDIA DGX Spark.
