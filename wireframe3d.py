@@ -610,12 +610,13 @@ class App(tk.Tk):
                 tt = ((za + zb) * 0.5 + 1.0) * 0.5
                 pa, pb = pts2[a], pts2[b]
                 c.create_line(pa[0], pa[1], pb[0], pb[1], fill=self.shade(rgb, tt),
-                              width=1 + (tt > 0.55))
+                              width=1 + (tt > 0.55), tags="frame")
             if shape.dots:
                 for x, y, z in pts3:
                     r = 1.7 + z * 1.2
                     c.create_oval(x - r, y - r, x + r, y + r,
-                                  fill=self.shade(rgb, (z + 1) * 0.5), outline="")
+                                  fill=self.shade(rgb, (z + 1) * 0.5), outline="",
+                                  tags="frame")
         else:
             two = shape.two_sided
             ghost_fill = shape.ghost_fill
@@ -708,17 +709,17 @@ class App(tk.Tk):
             items.sort(key=lambda it: it[0])
             c.delete("frame")
             for depth, fill, outline, coords in items:
-                c.create_polygon(*coords, fill=fill, outline=outline)
-        name, faces_n = shape.name, len(shape.faces)
-        c.create_text(12, 10, anchor="nw", fill="#9aa3b8",
+                c.create_polygon(*coords, fill=fill, outline=outline, tags="frame")
+        name = shape.name
+        c.create_text(12, 10, anchor="nw", fill="#9aa3b8", tags="frame",
                       text=f"{name}  ·  {mode}", font=("Segoe UI", 12, "bold"))
-        c.create_text(w - 12, 10, anchor="ne", fill="#6b7288",
+        c.create_text(w - 12, 10, anchor="ne", fill="#6b7288", tags="frame",
                       text=f"{self.fps:.0f} fps", font=("Segoe UI", 10))
         if self.show_help:
             c.create_rectangle(w / 2 - 175, h / 2 - 135, w / 2 + 175, h / 2 + 145,
-                               fill="#0b0b14", outline="#33355c")
+                               fill="#0b0b14", outline="#33355c", tags="frame")
             c.create_text(w / 2, h / 2 + 5, text=HELP_TEXT, fill="#c8cede",
-                          justify="center", font=("Segoe UI", 10))
+                          justify="center", font=("Segoe UI", 10), tags="frame")
 
     def animate(self):
         now = time.perf_counter()
